@@ -81,7 +81,7 @@ except Exception as e:
 
 # Load background
 try:
-    bg_path = os.path.join(os.path.dirname(__file__), 'assets', 'test2.png')
+    bg_path = os.path.join(os.path.dirname(__file__), 'assets', 'space-test.png')
     bg_img = Image.open(bg_path).resize((1000, 700)) 
     background = ImageTk.PhotoImage(bg_img)
 except Exception as e:
@@ -125,11 +125,11 @@ video_label.grid(column=0, row=0, sticky="N")
 # Logo label
 label = Label(mainframe, image=logo, font=space_font)
 label.image = logo
-label.grid(column=0, row=1, sticky="NE", pady=(100, 20), padx=(100, 0))
+label.grid(column=0, row=1, sticky="N", pady=(100, 20))
 
 # Posture status label (uses space font)
-posture_label = Label(mainframe, text="", font=space_font, bg = "white", fg="red")
-posture_label.grid(column=0, row=1, sticky="NW", pady=(100, 10), padx=(50, 0))
+posture_label = Label(mainframe, text="", font=space_font, bg= "#1b063d", fg="red")
+posture_label.grid(column=0, row=1, sticky="NW", pady=(100, 20))
 
 def process_frame():
     global initial_head_position, initial_head_shoulder_distance, initial_eye_distance, countdown_start_time, countdown_duration, head_drop_count, shrug_count, too_close_count, count, count2, count3, posture_start_time, posture_start_time2, posture_start_time3
@@ -243,23 +243,11 @@ def on_closing():
 root.protocol("WM_DELETE_WINDOW", on_closing)
 root.geometry("1000x700")
 
-# Overlay setup
-overlay = Toplevel(root)
+overlay = Tk.Toplevel(root)
 overlay.geometry("100x100")
 overlay.overrideredirect(True)
-overlay.configure(bg="#0B1B3A")
+overlay.congigure(bg="#0B1B3A")
 label = Label(overlay, text="Testing overlay...", bg="#0B1B3A", fg="white")
-
-# Toggle overlay
-def on_root_state_change(event):
-    state = root.state()
-    if state == 'iconic':  # Minimized
-        show_overlay()
-    elif state == 'normal':  # Restored
-        hide_overlay()
-
-root.bind('<Unmap>', on_root_state_change)
-root.bind('<Map>', on_root_state_change)
 
 # Run the app
 root.mainloop()
