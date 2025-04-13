@@ -3,8 +3,11 @@ import mediapipe as mp
 import statistics
 import time
 from tkinter import *
-from tkinter import ttk
+from tkinter import ttk, font as tkfont
 from PIL import Image, ImageTk  # For converting OpenCV frame to Tkinter-compatible format
+
+desired_width = 621
+desired_height = 431
 
 # Initialize MediaPipe Pose
 mp_pose = mp.solutions.pose
@@ -23,6 +26,72 @@ countdown_duration = 5
 def calculate_distance(point1, point2):
     return ((point1[0] - point2[0])**2 + (point1[1] - point2[1])**2) ** 0.5
 
+# Tkinter setup
+root = Tk()
+root.title("Posture Corrector")
+
+style = ttk.Style()
+style.theme_create("space", parent="alt", settings={
+    "TLabel": {"configure": {"background": "#0B1B3A", "foreground": "#B0C4DE", "font": ("Comic Sans", 12)}},
+    "TFrame": {"configure": {"background": "#0B1B3A"}},
+})
+style.theme_use("space")
+
+# Load logo
+try:
+    image_path = os.path.join(os.path.dirname(__file__), 'assets', 'slayce_logo.png')
+    original_img = Image.open(image_path)
+    resized_img = original_img.resize((100, 100))
+    logo = ImageTk.PhotoImage(resized_img)
+except Exception as e:
+    print("Error loading or resizing logo image:", e)
+    logo = None
+
+# Load background
+try:
+    bg_path = os.path.join(os.path.dirname(__file__), 'assets', 'space-test.png')
+    bg_img = Image.open(bg_path).resize((1000, 700)) 
+    background = ImageTk.PhotoImage(bg_img)
+except Exception as e:
+    print("Error loading or resizing background image:", e)
+    background = None
+
+# Load custom font or fallback
+try:
+    font_path = os.path.join(os.path.dirname(__file__), 'assets', 'space_font_serif.ttf')
+    space_font = tkfont.Font(file=font_path, size=24)
+except Exception as e:
+    print("Error: Could not load custom font. Using Arial.", e)
+    space_font = tkfont.Font(family="Arial", size=24)
+
+# Main frame setup
+mainframe = ttk.Frame(root)
+mainframe.grid(column=0, row=0, sticky=(N, W, E, S))
+mainframe['padding'] = 0
+
+root.columnconfigure(0, weight=1)
+root.rowconfigure(0, weight=1)
+mainframe.columnconfigure(0, weight=1)
+
+# --- Set background ---
+if background:
+    bg_label = Label(mainframe, image=background)
+    bg_label.place(x=0, y=0, relwidth=1, relheight=1)
+    bg_label.lower()
+
+# Video label
+video_label = Label(mainframe, width=desired_width, height=desired_height)
+video_label.grid(column=0, row=0, sticky="N")
+
+# Logo label
+label = Label(mainframe, image=logo, font=space_font)
+label.image = logo
+label.grid(column=0, row=1, sticky="N", pady=(100, 20))
+
+# Posture status label (uses space font)
+posture_label = Label(mainframe, text="", font=space_font, fg="red")
+posture_label.grid(column=0, row=2, pady=(100, 20))
+
 def process_frame():
     global initial_head_position, initial_head_shoulder_distance, countdown_start_time
 
@@ -33,6 +102,8 @@ def process_frame():
     frame = cv2.flip(frame, 1)
     rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     result = pose.process(rgb)
+
+    posture_warning = ""
 
     if result.pose_landmarks:
         left_shoulder = result.pose_landmarks.landmark[mp_pose.PoseLandmark.LEFT_SHOULDER]
@@ -50,58 +121,35 @@ def process_frame():
         time_elapsed = time.time() - countdown_start_time
         if initial_head_position is None or initial_head_shoulder_distance is None:
             if time_elapsed < countdown_duration:
-                cv2.putText(frame, f"Sit Up Straight!: {int(countdown_duration - time_elapsed)}",
-                            (10, 40), cv2.FONT_HERSHEY_SIMPLEX, 1.2, (0, 255, 255), 2)
+                posture_label.config(
+                    text=f"Calibrating... Sit up straight ({int(countdown_duration - time_elapsed)}s)", fg="yellow",font=space_font)
             else:
                 initial_head_position = current_head_position
                 initial_head_shoulder_distance = current_head_shoulder_distance
+                posture_label.config(text="Calibration complete. Maintain good posture!", fg="green", font=space_font)
         else:
-            posture_bad = False
             if current_head_shoulder_distance < initial_head_shoulder_distance - 30:
-                posture_bad = True
-                cv2.putText(frame, "Bad Posture: Shoulders too high", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+                posture_warning += "Shoulders too high. "
             if current_head_position > initial_head_position + 30:
-                posture_bad = True
-                cv2.putText(frame, "Bad Posture: Head dropped", (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+                posture_warning += "Head dropped."
 
-            # Add info
-            cv2.putText(frame, f"Head Shoulder Distance: {current_head_shoulder_distance:.2f}", (10, 90),
-                        cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
-            cv2.putText(frame, f"Head Pos: {current_head_position:.2f}", (10, 120),
-                        cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
+            if posture_warning:
+                posture_label.config(text=posture_warning, fg="red",font=space_font)
+            else:
+                posture_label.config(text="Posture looks good!", fg="green",font=space_font)
 
         # Draw pose landmarks
         mp.solutions.drawing_utils.draw_landmarks(frame, result.pose_landmarks, mp_pose.POSE_CONNECTIONS)
 
     # Convert frame to image for Tkinter
+    frame = cv2.resize(frame, (desired_width, desired_height))
     img = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
     imgtk = ImageTk.PhotoImage(image=img)
 
     video_label.imgtk = imgtk
     video_label.configure(image=imgtk)
 
-    # Repeat after 10ms
     root.after(10, process_frame)
-
-# === Tkinter GUI Setup ===
-root = Tk()
-root.title("Posture Corrector")
-
-style = ttk.Style()
-style.theme_create("space", parent="alt", settings={
-    "TLabel": {"configure": {"background": "#0B1B3A", "foreground": "#B0C4DE", "font": ("Comic Sans", 12)}},
-    "TFrame": {"configure": {"background": "#0B1B3A"}},
-})
-style.theme_use("space")
-
-mainframe = ttk.Frame(root)
-mainframe.grid(column=0, row=0, sticky=(N, W, E, S))
-mainframe['padding'] = (10, 10, 10, 10)
-
-# Add video label
-video_label = Label(mainframe)
-video_label.grid(column=0, row=0)
-
 # Start video processing loop
 process_frame()
 
