@@ -18,8 +18,9 @@ pose = mp_pose.Pose()
 cap = cv2.VideoCapture(0)  # Use 0 for default webcam
 
 # Initial calibration
-initial_shoulder_distance = None
+initial_shoulder_level = None
 initial_head_position = None
+initial_head_shoulder_distance = None
 initial_eye_distance = None
 
 # count how many times we encounter a type of bad posture
@@ -115,7 +116,7 @@ posture_label = Label(mainframe, text="", font=space_font, bg= "#1b063d", fg="re
 posture_label.grid(column=0, row=1, sticky="NW", pady=(100, 20))
 
 def process_frame():
-    global initial_head_position, initial_head_shoulder_distance, countdown_start_time
+    global initial_head_position, initial_head_shoulder_distance, initial_eye_distance, countdown_start_time, countdown_duration, head_drop_count, shrug_count, too_close_count, count, count2, count3, posture_start_time, posture_start_time2, posture_start_time3
 
     ret, frame = cap.read()
     if not ret:
@@ -158,7 +159,7 @@ def process_frame():
                 initial_eye_distance = current_eye_distance
                 posture_label.config(text="Calibration complete. Maintain good posture!", fg="green", font=space_font)
         else:
-            if current_head_shoulder_distance < initial_head_shoulder_distance - 30:
+            if current_shoulder_level < initial_head_shoulder_distance - 30:
                 if count == 1:
                     posture_start_time = time.time()
                     count += 1
