@@ -2,6 +2,7 @@ import cv2
 import mediapipe as mp
 import time
 import os
+import tkinter as tk
 from tkinter import *
 from tkinter import ttk, font as tkfont
 from PIL import Image, ImageTk  # For converting OpenCV frame to Tkinter-compatible format
@@ -49,6 +50,7 @@ face_bad = False
 head_drop = 0
 shoulder_hunch = 0
 face_closeness = 0
+mission_control_response = ""
 
 # count how many times we encounter a type of bad posture
 head_drop_count = 0
@@ -157,10 +159,35 @@ def animate_logo(x=0):
         moving_logo.place(x=x, y=50)
         root.after(10, animate_logo, x+30) 
     else:
-        moving_logo.place_forget() 
+        moving_logo.place_forget()
+
+# def check_for_message():
+#     global mission_control_response
+#     if mission_control_response:
+#         # Show popup window
+#         show_popup(mission_control_response)
+#         mission_control_response = ""  # Reset the variable after showing the popup
+#     # Check again in 1 second
+#     root.after(500, check_for_message)
+
+def show_popup(message):
+    popup = tk.Toplevel()
+    popup.title("Alert from Mission Control!")
+    popup.geometry("300x120")
+    popup.configure(bg="#1b063d")
+
+    label = tk.Label(popup, text=message, fg="white", bg="#1b063d", wraplength=280, font=("Arial", 11))
+    label.pack(pady=10, padx=10)
+
+    btn = tk.Button(popup, text="OK", command=popup.destroy)
+    btn.pack(pady=5)
 
 def process_frame():
-    global initial_head_position, initial_head_shoulder_distance, initial_eye_distance, countdown_start_time, countdown_duration, bad_posture, head_bad, shoulders_bad, face_bad, head_drop, shoulder_hunch, face_closeness, head_drop_count, shrug_count, too_close_count, count, count2, count3, posture_start_time, posture_start_time2, posture_start_time3, isCalibrated
+    global initial_head_position, initial_head_shoulder_distance, initial_eye_distance, countdown_start_time, countdown_duration, bad_posture, head_bad, shoulders_bad, face_bad, head_drop, shoulder_hunch, face_closeness, head_drop_count, shrug_count, too_close_count, count, count2, count3, posture_start_time, posture_start_time2, posture_start_time3, isCalibrated, mission_control_response
+
+    if mission_control_response:
+        show_popup(mission_control_response)
+        mission_control_response = ""
 
     ret, frame = cap.read()
     if not ret:
@@ -333,5 +360,6 @@ reset_label = Label(
 )
 
 reset_label.bind("<Button-1>", lambda event: reset())
+
 # Run the app
 root.mainloop()
