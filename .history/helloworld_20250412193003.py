@@ -13,10 +13,12 @@ mainframe.grid(column=0, row=0, sticky=(N, W, E, S))  # Attach frame to the wind
 root.columnconfigure(0, weight=1)
 root.rowconfigure(0, weight=1)
 
-label = ttk.Label(mainframe, text='test')
+label = ttk.Label(mainframe, text='Full name:')
 label.grid(column=0, row=0, sticky=W)
 
-mainframe['padding'] = (100,100,100,100) # left: 100, top: 100, right: 100, bottom: 100
+mainframe['padding'] = 5           # 5 pixels on all sides
+mainframe['padding'] = (5,10)      # 5 on left and right, 10 on top and bottom
+mainframe['padding'] = (5,7,10,12) # left: 5, top: 7, right: 10, bottom: 12
 
 
 
