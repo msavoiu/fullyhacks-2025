@@ -261,5 +261,14 @@ def on_root_state_change(event):
 root.bind('<Unmap>', on_root_state_change)
 root.bind('<Map>', on_root_state_change)
 
+reset_button = Button(mainframe, text="Recalibrate", font=space_font, bg="lightblue", command=lambda: [
+    globals().__setitem__('initial_shoulder_level', None),
+    globals().__setitem__('initial_head_position', None),
+    globals().__setitem__('initial_head_shoulder_distance', None),
+    globals().__setitem__('initial_eye_distance', None),
+    globals().__setitem__('countdown_start_time', time.time()),
+])
+reset_button.place(relx=1.0, rely=1.0, anchor='se', x=-30, y=-30)  # 30px padding from bottom-right
+
 # Run the app
 root.mainloop()
