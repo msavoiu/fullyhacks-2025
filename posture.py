@@ -11,6 +11,11 @@ initial_shoulder_distance = None
 initial_head_position = None
 initial_eye_distance = None
 
+# count how many times we encounter a type of bad posture
+head_drop_count = 0
+too_close_count = 0
+shrug_count = 0
+
 # function to calculate distance between two points
 def calculate_distance(point1, point2):
     return ((point1[0] - point2[0])**2 + (point1[1] - point2[1])**2) ** 0.5
@@ -90,6 +95,7 @@ while cap.isOpened():
                 else:
                     posture_time_elapsed = time.time() - posture_start_time
                     if posture_time_elapsed >= 4:
+                        shrug_count += 1
                         cv2.putText(frame, "Bad Posture: Shoulders too high", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
             else:
                 # Reset if posture improves
@@ -104,6 +110,7 @@ while cap.isOpened():
                 else:
                     posture_time_elapsed2 = time.time() - posture_start_time2
                     if posture_time_elapsed2 >= 4:
+                        head_drop_count += 1
                         cv2.putText(frame, "Bad Posture: Head dropped", (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
             else:
                 # Reset if posture improves
@@ -117,6 +124,7 @@ while cap.isOpened():
                 else:
                     posture_time_elapsed3 = time.time() - posture_start_time3
                     if posture_time_elapsed3 >= 4:
+                        too_close_count += 1
                         cv2.putText(frame, "Bad Posture: Head Too Close", (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
             else:
                 # Reset if posture improves
