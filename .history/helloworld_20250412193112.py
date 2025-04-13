@@ -4,13 +4,6 @@ from tkinter import ttk
 # Create the main application window
 root = Tk()
 root.title("Posture Corrector")  # Set window title
-style = ttk.Style()
-
-style.theme_create("space", parent="alt", settings={
-    "TLabel": {"configure": {"background": "#0B1B3A", "foreground": "#B0C4DE", "font": ("Comic Sans", 12)}},
-    "TFrame": {"configure": {"background": "#0B1B3A"}},
-})
-style.theme_use("space")
 
 # Create a main frame with padding inside the root window
 mainframe = ttk.Frame(root)
@@ -23,10 +16,9 @@ root.rowconfigure(0, weight=1)
 label = ttk.Label(mainframe, text='test')
 label.grid(column=0, row=0, sticky=W)
 
-mainframe['padding'] = (100,100,100,100) # left: 100, top: 100, right: 100, bottom: 100
+mainframe['padding'] = (100,100,100,100) # left: 5, top: 7, right: 10, bottom: 12
+
 
 
 # Start the main event loop
 root.mainloop()
-
-
