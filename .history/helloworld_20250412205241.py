@@ -1,7 +1,6 @@
 from tkinter import *
 from tkinter import ttk
 from tkinter import font as tkfont
-from PIL import Image, ImageTk
 import os
 
 # Create the main application window
@@ -14,17 +13,7 @@ style.theme_create("space", parent="alt", settings={
     "TFrame": {"configure": {"background": "#0B1B3A"}},
 })
 style.theme_use("space")
-
-
-try:
-    image_path = os.path.join(os.path.dirname(__file__), 'assets', 'slayce_logo.png')
-    original_img = Image.open(image_path)
-    resized_img = original_img.resize((75, 75))  # Resize to 150x150
-    logo = ImageTk.PhotoImage(resized_img)
-except Exception as e:
-    print("Error loading or resizing image:", e)
-    logo = None
-
+logo = PhotoImage(file='assets/slayce_logo.png')
 
 # Trying to use the space_font_serif font. If it fails, then fallback on Arial.
 try:
@@ -45,12 +34,9 @@ mainframe.grid(column=0, row=0, sticky=(N, W, E, S))  # Attach frame to the wind
 root.columnconfigure(0, weight=1)
 root.rowconfigure(0, weight=1)
 
-mainframe.columnconfigure(0, weight=1)
-mainframe.rowconfigure(0, weight=1)
-
-label = Label(mainframe, image=logo, font=space_font, compound=TOP, background="#0B1B3A")
+label = Label(mainframe, text='test', image=logo, font=space_font)
 label.image = logo
-label.grid(column=0, row=0, sticky="N")
+label.grid(column=0, row=0, sticky=W)
 
 mainframe['padding'] = (50) # 50 on each side
 

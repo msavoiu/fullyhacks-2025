@@ -48,9 +48,9 @@ root.rowconfigure(0, weight=1)
 mainframe.columnconfigure(0, weight=1)
 mainframe.rowconfigure(0, weight=1)
 
-label = Label(mainframe, image=logo, font=space_font, compound=TOP, background="#0B1B3A")
+label = Label(mainframe, image=logo, font=space_font, compound=TOP)
 label.image = logo
-label.grid(column=0, row=0, sticky="N")
+label.grid(column=0, row=0, pady=(20, 0), sticky="N")
 
 mainframe['padding'] = (50) # 50 on each side
 
