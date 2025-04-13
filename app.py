@@ -17,14 +17,28 @@ pose = mp_pose.Pose()
 cap = cv2.VideoCapture(0)  # Use 0 for default webcam
 
 # Initial calibration
+initial_shoulder_distance = None
 initial_head_position = None
-initial_head_shoulder_distance = None
+initial_eye_distance = None
+
+# count how many times we encounter a type of bad posture
+head_drop_count = 0
+too_close_count = 0
+shrug_count = 0
+
+# function to calculate distance between two points
+def calculate_distance(point1, point2):
+    return ((point1[0] - point2[0])**2 + (point1[1] - point2[1])**2) ** 0.5
+
 countdown_start_time = time.time()
 countdown_duration = 5
 
-# Function to calculate distance
-def calculate_distance(point1, point2):
-    return ((point1[0] - point2[0])**2 + (point1[1] - point2[1])**2) ** 0.5
+posture_start_time = None
+posture_start_time2 = None
+posture_start_time3 = None
+count = 1
+count2 = 1
+count3 = 1
 
 # Tkinter setup
 root = Tk()
@@ -109,29 +123,72 @@ def process_frame():
         left_shoulder = result.pose_landmarks.landmark[mp_pose.PoseLandmark.LEFT_SHOULDER]
         right_shoulder = result.pose_landmarks.landmark[mp_pose.PoseLandmark.RIGHT_SHOULDER]
         head = result.pose_landmarks.landmark[mp_pose.PoseLandmark.NOSE]
+        left_eye = result.pose_landmarks.landmark[mp_pose.PoseLandmark.LEFT_EAR]
+        right_eye = result.pose_landmarks.landmark[mp_pose.PoseLandmark.RIGHT_EAR]
 
+         # Convert landmark positions to pixel values
         left_shoulder_pos = (left_shoulder.x * frame.shape[1], left_shoulder.y * frame.shape[0])
         right_shoulder_pos = (right_shoulder.x * frame.shape[1], right_shoulder.y * frame.shape[0])
         head_pos = (head.x * frame.shape[1], head.y * frame.shape[0])
+        left_eye_pos = (left_eye.x * frame.shape[1], left_eye.y * frame.shape[0])
+        right_eye_pos = (right_eye.x * frame.shape[1], right_eye.y * frame.shape[0])
+
+        current_eye_distance = calculate_distance(left_eye_pos, right_eye_pos)
 
         current_head_position = head_pos[1]
         current_shoulder_level = left_shoulder_pos[1]
         current_head_shoulder_distance = abs(current_head_position - current_shoulder_level)
 
         time_elapsed = time.time() - countdown_start_time
-        if initial_head_position is None or initial_head_shoulder_distance is None:
+        if current_head_shoulder_distance is None or initial_head_position is None or initial_eye_distance is None:
             if time_elapsed < countdown_duration:
                 posture_label.config(
                     text=f"Calibrating... Sit up straight ({int(countdown_duration - time_elapsed)}s)", fg="yellow",font=space_font)
             else:
-                initial_head_position = current_head_position
                 initial_head_shoulder_distance = current_head_shoulder_distance
+                initial_head_position = current_head_position
+                initial_eye_distance = current_eye_distance
                 posture_label.config(text="Calibration complete. Maintain good posture!", fg="green", font=space_font)
         else:
             if current_head_shoulder_distance < initial_head_shoulder_distance - 30:
-                posture_warning += "Shoulders too high. "
+                if count == 1:
+                    posture_start_time = time.time()
+                    count += 1
+                else:
+                    posture_time_elapsed = time.time() - posture_start_time
+                    if posture_time_elapsed >= 4:
+                        shrug_count += 1
+                        posture_warning += "Shoulders too high. "
+            else:
+                count = 1
+                posture_start_time = None
+
             if current_head_position > initial_head_position + 30:
-                posture_warning += "Head dropped."
+                if count2 == 1:
+                    posture_start_time2 = time.time()
+                    count2 += 1
+                else:
+                    posture_time_elapsed2 = time.time() - posture_start_time2
+                    if posture_time_elapsed2 >= 4:
+                        head_drop_count += 1
+                        posture_warning += "Head dropped."
+            else:
+                count2 = 1
+                posture_start_time2 = None
+
+            if current_eye_distance > initial_eye_distance + 100:
+                if count3 == 1:
+                    posture_start_time3 = time.time()
+                    count3 += 1
+                else:
+                    posture_time_elapsed3 = time.time() - posture_start_time3
+                    if posture_time_elapsed3 >= 4:
+                        head_drop_count += 1
+                        posture_warning += "Head too close."
+            else:
+                count3 = 1
+                posture_start_time3 = None
+
 
             if posture_warning:
                 posture_label.config(text=posture_warning, fg="red",font=space_font)
