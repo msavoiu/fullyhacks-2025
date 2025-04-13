@@ -62,6 +62,7 @@ isCalibrated = 0
 
 # Tkinter setup
 root = Tk()
+root.configure(bg="#1b063d")
 root.title("Posture Corrector")
 
 style = ttk.Style()
@@ -181,8 +182,10 @@ def process_frame():
         current_shoulder_level = left_shoulder_pos[1]
         current_head_shoulder_distance = abs(current_head_position - current_shoulder_level)
 
-        if isCalibrated == 1:
-                    reset_button.place(relx=1.0, rely=1.0, anchor='se', x=-30, y=-30)
+        #CHANGE
+        if isCalibrated >= 1:
+                    reset_label.place(relx=1.0, rely=1.0, anchor='se', x=-130, y=-70)
+
 
         time_elapsed = time.time() - countdown_start_time
         # if current_head_shoulder_distance is None or initial_head_position is None or initial_eye_distance is None:
@@ -286,25 +289,29 @@ def on_root_state_change(event):
 root.bind('<Unmap>', on_root_state_change)
 root.bind('<Map>', on_root_state_change)
 
-ship_image = PhotoImage(file="assets/ship.png")
+ship_image = Image.open("assets/ship.png")  # Ensure the path is correct
 
-reset_button = Button(
-    mainframe,
+# Resize the image to a desired size (e.g., 50x50)
+ship_image = ship_image.resize((100, 100))  # Adjust width and height as needed
+
+# Convert the image to a Tkinter-compatible format
+ship_image = ImageTk.PhotoImage(ship_image)
+
+def reset():
+    globals().__setitem__('initial_shoulder_level', None)
+    globals().__setitem__('initial_head_position', None)
+    globals().__setitem__('initial_head_shoulder_distance', None)
+    globals().__setitem__('initial_eye_distance', None)
+    globals().__setitem__('countdown_start_time', time.time())
+    reset_label.place_forget()
+
+reset_label = Label(
+    root,
     image=ship_image,
-    command=lambda: [
-        globals().__setitem__('initial_shoulder_level', None),
-        globals().__setitem__('initial_head_position', None),
-        globals().__setitem__('initial_head_shoulder_distance', None),
-        globals().__setitem__('initial_eye_distance', None),
-        globals().__setitem__('countdown_start_time', time.time()),
-        reset_button.place_forget()
-    ],
-    borderwidth=0,  # optional: remove button border
-    bg="lightblue",  # optional: background
+    bg="#1b063d",  # Set background to match window color
+    bd=0  # Remove label border
 )
 
-# Store a reference to the image to avoid garbage collection
-reset_button.image = ship_image
-
+reset_label.bind("<Button-1>", lambda event: reset())
 # Run the app
 root.mainloop()
