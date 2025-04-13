@@ -6,7 +6,7 @@ mp_pose = mp.solutions.pose
 pose = mp_pose.Pose()
 cap = cv2.VideoCapture(1)
 
-# store the initial positions of the head and shoulders
+# store the initial positions of the head and shoulders for calibration
 initial_shoulder_distance = None
 initial_head_position = None
 
@@ -15,7 +15,7 @@ def calculate_distance(point1, point2):
     return ((point1[0] - point2[0])**2 + (point1[1] - point2[1])**2) ** 0.5
 
 # countdown timer
-countdown_start_time = time.time()
+countdown_start_time = time.time() #current time for comparison
 countdown_duration = 5  # seconds
 
 while cap.isOpened():
@@ -23,13 +23,16 @@ while cap.isOpened():
     if not ret:
         break
 
+    # this just makes the cam act as a mirror
     frame = cv2.flip(frame, 1)
+    # makes the frame compatible for mediapipe
     rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
     result = pose.process(rgb)
 
+    # if we detect a person
     if result.pose_landmarks:
-        # Get the current positions
+        # Get the current positions of head and two shoulders
         left_shoulder = result.pose_landmarks.landmark[mp_pose.PoseLandmark.LEFT_SHOULDER]
         right_shoulder = result.pose_landmarks.landmark[mp_pose.PoseLandmark.RIGHT_SHOULDER]
         head = result.pose_landmarks.landmark[mp_pose.PoseLandmark.NOSE]
@@ -48,6 +51,7 @@ while cap.isOpened():
         # Handle countdown for initial posture capture
         time_elapsed = time.time() - countdown_start_time
         if initial_shoulder_distance is None or initial_head_position is None:
+            # if we are still counting down then we display it, if not we capture the positions of the head and shoulders
             if time_elapsed < countdown_duration:
                 cv2.putText(frame, f"Sit Up Straight!: {int(countdown_duration - time_elapsed)}",
                             (10, 40), cv2.FONT_HERSHEY_SIMPLEX, 1.2, (0, 255, 255), 2)
@@ -56,9 +60,8 @@ while cap.isOpened():
                 initial_head_position = current_head_position
                 print("Initial shoulder distance:", initial_shoulder_distance)
                 print("Initial head position:", initial_head_position)
-
+        # we have already initialized the values now we constantly compare them
         else:
-            # Posture analysis: Check for deviation from the initial values
             posture_bad = False
             if current_shoulder_distance < initial_shoulder_distance * 0.9:
                 posture_bad = True
@@ -75,6 +78,7 @@ while cap.isOpened():
         # Draw pose landmarks on the frame
         mp.solutions.drawing_utils.draw_landmarks(frame, result.pose_landmarks, mp_pose.POSE_CONNECTIONS)
 
+    # the frame of the pop up window and the title for it
     cv2.imshow("Posture Detection", frame)
     if cv2.waitKey(10) & 0xFF == ord("q"):
         break
