@@ -5,6 +5,7 @@ import os
 from tkinter import *
 from tkinter import ttk, font as tkfont
 from PIL import Image, ImageTk  # For converting OpenCV frame to Tkinter-compatible format
+from tkinter import PhotoImage
 
 # Functions for overlay
 
@@ -273,14 +274,25 @@ def on_root_state_change(event):
 root.bind('<Unmap>', on_root_state_change)
 root.bind('<Map>', on_root_state_change)
 
-reset_button = Button(mainframe, text="Recalibrate", font=space_font, bg="lightblue", command=lambda: [
-    globals().__setitem__('initial_shoulder_level', None),
-    globals().__setitem__('initial_head_position', None),
-    globals().__setitem__('initial_head_shoulder_distance', None),
-    globals().__setitem__('initial_eye_distance', None),
-    globals().__setitem__('countdown_start_time', time.time()),
-    reset_button.place_forget()
-])
+ship_image = PhotoImage(file="assets/ship.png")
+
+reset_button = Button(
+    mainframe,
+    image=ship_image,
+    command=lambda: [
+        globals().__setitem__('initial_shoulder_level', None),
+        globals().__setitem__('initial_head_position', None),
+        globals().__setitem__('initial_head_shoulder_distance', None),
+        globals().__setitem__('initial_eye_distance', None),
+        globals().__setitem__('countdown_start_time', time.time()),
+        reset_button.place_forget()
+    ],
+    borderwidth=0,  # optional: remove button border
+    bg="lightblue",  # optional: background
+)
+
+# Store a reference to the image to avoid garbage collection
+reset_button.image = ship_image
 
 # Run the app
 root.mainloop()
