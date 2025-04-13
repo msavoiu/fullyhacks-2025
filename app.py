@@ -58,6 +58,8 @@ count = 1
 count2 = 1
 count3 = 1
 
+isCalibrated = 0
+
 # Tkinter setup
 root = Tk()
 root.title("Posture Corrector")
@@ -132,7 +134,7 @@ posture_label = Label(mainframe, text="", font=space_font, bg = "white", fg="red
 posture_label.grid(column=0, row=1, sticky="NW", pady=(100, 10), padx=(50, 0))
 
 def process_frame():
-    global initial_head_position, initial_head_shoulder_distance, initial_eye_distance, countdown_start_time, countdown_duration, head_drop_count, shrug_count, too_close_count, count, count2, count3, posture_start_time, posture_start_time2, posture_start_time3
+    global initial_head_position, initial_head_shoulder_distance, initial_eye_distance, countdown_start_time, countdown_duration, head_drop_count, shrug_count, too_close_count, count, count2, count3, posture_start_time, posture_start_time2, posture_start_time3, isCalibrated
 
     ret, frame = cap.read()
     if not ret:
@@ -164,6 +166,9 @@ def process_frame():
         current_shoulder_level = left_shoulder_pos[1]
         current_head_shoulder_distance = abs(current_head_position - current_shoulder_level)
 
+        if isCalibrated == 1:
+                    reset_button.place(relx=1.0, rely=1.0, anchor='se', x=-30, y=-30)
+
         time_elapsed = time.time() - countdown_start_time
         if current_head_shoulder_distance is None or initial_head_position is None or initial_eye_distance is None:
             if time_elapsed < countdown_duration:
@@ -174,6 +179,8 @@ def process_frame():
                 initial_head_position = current_head_position
                 initial_eye_distance = current_eye_distance
                 posture_label.config(text="Calibration complete. Maintain good posture!", fg="green", font=space_font)
+                isCalibrated += 1
+
         else:
             if current_shoulder_level < initial_head_shoulder_distance - 30:
                 if count == 1:
@@ -267,8 +274,8 @@ reset_button = Button(mainframe, text="Recalibrate", font=space_font, bg="lightb
     globals().__setitem__('initial_head_shoulder_distance', None),
     globals().__setitem__('initial_eye_distance', None),
     globals().__setitem__('countdown_start_time', time.time()),
+    reset_button.place_forget()
 ])
-reset_button.place(relx=1.0, rely=1.0, anchor='se', x=-30, y=-30)  # 30px padding from bottom-right
 
 # Run the app
 root.mainloop()
