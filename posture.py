@@ -19,6 +19,11 @@ def calculate_distance(point1, point2):
 countdown_start_time = time.time() #current time for comparison
 countdown_duration = 5  # seconds
 
+posture_start_time = None
+posture_start_time2 = None
+count = 1
+count2 = 1
+
 while cap.isOpened():
     ret, frame = cap.read()
     if not ret:
@@ -67,17 +72,37 @@ while cap.isOpened():
                 print("Initial head position:", initial_head_position)
         # we have already initialized the values now we constantly compare them
         else:
-# Posture analysis: Check for deviation from the initial values
-            posture_bad = False
-            shoulder_raise_threshold = -30 # Adjust this threshold based on testing
+            # Posture analysis: Check for deviation from the initial values
+            shoulder_raise_threshold = -30  # Adjust this threshold based on testing
 
+            # Check for shoulders raised (shoulders too high)
             if current_head_shoulder_distance < initial_head_shoulder_distance + shoulder_raise_threshold:
-                posture_bad = True
-                cv2.putText(frame, "Bad Posture: Shoulders too high", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+                if count == 1:
+                    posture_start_time = time.time()
+                    count += 1
+                else:
+                    posture_time_elapsed = time.time() - posture_start_time
+                    if posture_time_elapsed >= 7:
+                        cv2.putText(frame, "Bad Posture: Shoulders too high", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+            else:
+                # Reset if posture improves
+                count = 1
+                posture_start_time = None
 
+            # Check for head dropped
             if current_head_position > initial_head_position + 30:
-                posture_bad = True
-                cv2.putText(frame, "Bad Posture: Head dropped", (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+                if count2 == 1:
+                    posture_start_time2 = time.time()
+                    count2 += 1
+                else:
+                    posture_time_elapsed2 = time.time() - posture_start_time2
+                    if posture_time_elapsed2 >= 7:
+                        cv2.putText(frame, "Bad Posture: Head dropped", (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+            else:
+                # Reset if posture improves
+                count2 = 1
+                posture_start_time2 = None
+
 
             # Display the shoulder distance and head position on the frame
             cv2.putText(frame, f"Head Shoulder Distance: {current_head_shoulder_distance:.2f}", (10, 90), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
