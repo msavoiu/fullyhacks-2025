@@ -65,7 +65,7 @@ except Exception as e:
 
 # Load background
 try:
-    bg_path = os.path.join(os.path.dirname(__file__), 'assets', 'space-test.png')
+    bg_path = os.path.join(os.path.dirname(__file__), 'assets', 'test2.png')
     bg_img = Image.open(bg_path).resize((1000, 700)) 
     background = ImageTk.PhotoImage(bg_img)
 except Exception as e:
@@ -109,11 +109,11 @@ video_label.grid(column=0, row=0, sticky="N")
 # Logo label
 label = Label(mainframe, image=logo, font=space_font)
 label.image = logo
-label.grid(column=0, row=1, sticky="N", pady=(100, 20))
+label.grid(column=0, row=1, sticky="NE", pady=(100, 20), padx=(100, 0))
 
 # Posture status label (uses space font)
-posture_label = Label(mainframe, text="", font=space_font, bg= "#1b063d", fg="red")
-posture_label.grid(column=0, row=1, sticky="NW", pady=(100, 20))
+posture_label = Label(mainframe, text="", font=space_font, bg = "white", fg="red")
+posture_label.grid(column=0, row=1, sticky="NW", pady=(100, 10), padx=(50, 0))
 
 def process_frame():
     global initial_head_position, initial_head_shoulder_distance, initial_eye_distance, countdown_start_time, countdown_duration, head_drop_count, shrug_count, too_close_count, count, count2, count3, posture_start_time, posture_start_time2, posture_start_time3
