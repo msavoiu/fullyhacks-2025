@@ -83,7 +83,7 @@ except Exception as e:
 
 # Load background
 try:
-    bg_path = os.path.join(os.path.dirname(__file__), 'assets', 'test2.png')
+    bg_path = os.path.join(os.path.dirname(__file__), 'assets', 'test3.png')
     bg_img = Image.open(bg_path).resize((1000, 700)) 
     background = ImageTk.PhotoImage(bg_img)
 except Exception as e:
@@ -96,13 +96,13 @@ try:
     
     if os.path.exists(font_path):
         print("Custom font file found, attempting to use it.")
-        space_font = tkfont.Font(family="Space Grotesk Light", size=24)
+        space_font = tkfont.Font(family="Space Grotesk Light", size=18)
     else:
         raise FileNotFoundError("Font file not found.")
 
 except Exception as e:
     print("Error: Could not load custom font. Using Arial.", e)
-    space_font = tkfont.Font(family="Arial", size=24)
+    space_font = tkfont.Font(family="Arial", size=18)
 
 # Main frame setup
 mainframe = ttk.Frame(root)
@@ -131,7 +131,11 @@ label.grid(column=0, row=1, sticky="NE", pady=(100, 20), padx=(100, 0))
 
 # Posture status label (uses space font)
 posture_label = Label(mainframe, text="", font=space_font, bg = "white", fg="red")
-posture_label.grid(column=0, row=1, sticky="NW", pady=(100, 10), padx=(50, 0))
+posture_label.grid(column=0, row=1, sticky="NW", pady=(85, 10), padx=(50, 0))
+
+title_label = Label(mainframe, text="Fully Hacks 2025", font=space_font, bg="white", fg="black")
+title_label.grid(row=0, column=0,columnspan=3, pady=(0, 10), padx=0,sticky="n")
+
 
 def process_frame():
     global initial_head_position, initial_head_shoulder_distance, initial_eye_distance, countdown_start_time, countdown_duration, head_drop_count, shrug_count, too_close_count, count, count2, count3, posture_start_time, posture_start_time2, posture_start_time3, isCalibrated
@@ -173,14 +177,13 @@ def process_frame():
         if current_head_shoulder_distance is None or initial_head_position is None or initial_eye_distance is None:
             if time_elapsed < countdown_duration:
                 posture_label.config(
-                    text=f"Calibrating... Sit up straight ({int(countdown_duration - time_elapsed)}s)", fg="yellow",font=space_font)
+                    text=f"Calibrating...Sit up straight\n({int(countdown_duration - time_elapsed)}s)", fg="black",font=space_font)
             else:
                 initial_head_shoulder_distance = current_head_shoulder_distance
                 initial_head_position = current_head_position
                 initial_eye_distance = current_eye_distance
-                posture_label.config(text="Calibration complete. Maintain good posture!", fg="green", font=space_font)
+                posture_label.config(text="Calibration complete.\n Maintain good posture!", fg="green", font=space_font)
                 isCalibrated += 1
-
         else:
             if current_shoulder_level < initial_head_shoulder_distance - 30:
                 if count == 1:
@@ -203,7 +206,7 @@ def process_frame():
                     posture_time_elapsed2 = time.time() - posture_start_time2
                     if posture_time_elapsed2 >= 4:
                         head_drop_count += 1
-                        posture_warning += "Head dropped."
+                        posture_warning += "\nHead dropped."
             else:
                 count2 = 1
                 posture_start_time2 = None
