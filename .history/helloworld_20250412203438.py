@@ -1,6 +1,7 @@
 from tkinter import *
 from tkinter import ttk
 from tkinter import font as tkfont
+import pyglet
 import os
 
 # Create the main application window
@@ -18,10 +19,13 @@ from tkinter import font as tkfont
 
 # Trying to use the space_font_serif font. If it fails, then fallback on Arial.
 try:
+    import pyglet
     import os
 
     font_path = os.path.join(os.path.dirname(__file__), 'assets', 'space_font_serif.ttf')
-    space_font = tkfont.Font(family="Space Grotesk Light", size=24)
+    pyglet.font.add_file(font_path)
+
+    space_font = tkfont.Font(family="font1", size=24)
 
 except Exception as e:
     print("Error: Could not load custom font. Using Arial.", e)
