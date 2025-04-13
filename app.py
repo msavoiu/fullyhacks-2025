@@ -7,6 +7,8 @@ from tkinter import ttk, font as tkfont
 from PIL import Image, ImageTk  # For converting OpenCV frame to Tkinter-compatible format
 from tkinter import PhotoImage
 
+from api import cerebrasRequest
+
 # Functions for overlay
 
 def show_overlay():
@@ -38,6 +40,15 @@ initial_shoulder_level = None
 initial_head_position = None
 initial_head_shoulder_distance = None
 initial_eye_distance = None
+
+# Track these to figure out when we should send a request to Cerebras
+bad_posture = False
+head_bad = False
+shoulders_bad = False
+face_bad = False
+head_drop = 0
+shoulder_hunch = 0
+face_closeness = 0
 
 # count how many times we encounter a type of bad posture
 head_drop_count = 0
@@ -149,7 +160,7 @@ def animate_logo(x=0):
         moving_logo.place_forget() 
 
 def process_frame():
-    global initial_head_position, initial_head_shoulder_distance, initial_eye_distance, countdown_start_time, countdown_duration, head_drop_count, shrug_count, too_close_count, count, count2, count3, posture_start_time, posture_start_time2, posture_start_time3, isCalibrated
+    global initial_head_position, initial_head_shoulder_distance, initial_eye_distance, countdown_start_time, countdown_duration, bad_posture, head_bad, shoulders_bad, face_bad, head_drop, shoulder_hunch, face_closeness, head_drop_count, shrug_count, too_close_count, count, count2, count3, posture_start_time, posture_start_time2, posture_start_time3, isCalibrated
 
     ret, frame = cap.read()
     if not ret:
@@ -171,7 +182,7 @@ def process_frame():
 
          # Convert landmark positions to pixel values
         left_shoulder_pos = (left_shoulder.x * frame.shape[1], left_shoulder.y * frame.shape[0])
-        right_shoulder_pos = (right_shoulder.x * frame.shape[1], right_shoulder.y * frame.shape[0])
+        # right_shoulder_pos = (right_shoulder.x * frame.shape[1], right_shoulder.y * frame.shape[0])
         head_pos = (head.x * frame.shape[1], head.y * frame.shape[0])
         left_eye_pos = (left_eye.x * frame.shape[1], left_eye.y * frame.shape[0])
         right_eye_pos = (right_eye.x * frame.shape[1], right_eye.y * frame.shape[0])
@@ -210,6 +221,8 @@ def process_frame():
                 else:
                     posture_time_elapsed = time.time() - posture_start_time
                     if posture_time_elapsed >= 4:
+                        bad_posture = True
+                        shoulder_hunch = current_head_shoulder_distance
                         shrug_count += 1
                         posture_warning += "Shoulders too high. "
             else:
@@ -223,6 +236,8 @@ def process_frame():
                 else:
                     posture_time_elapsed2 = time.time() - posture_start_time2
                     if posture_time_elapsed2 >= 4:
+                        bad_posture = True
+                        head_drop = current_head_position - initial_head_position
                         head_drop_count += 1
                         posture_warning += "\nHead dropped."
             else:
@@ -236,12 +251,17 @@ def process_frame():
                 else:
                     posture_time_elapsed3 = time.time() - posture_start_time3
                     if posture_time_elapsed3 >= 4:
+                        bad_posture = True
+                        face_closeness = current_eye_distance - initial_eye_distance
                         head_drop_count += 1
                         posture_warning += "Head too close."
             else:
                 count3 = 1
                 posture_start_time3 = None
 
+            if bad_posture:
+                mission_control_response = cerebrasRequest(head_bad, shoulders_bad, face_bad, head_drop, shoulder_hunch, face_closeness)
+                # Send the message to the popup window
 
             if posture_warning:
                 posture_label.config(text=posture_warning, fg="red",font=space_font)
