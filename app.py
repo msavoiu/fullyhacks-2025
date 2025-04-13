@@ -52,6 +52,10 @@ shoulder_hunch = 0
 face_closeness = 0
 mission_control_response = ""
 
+# Popup flag
+flag = False
+posture_flag = False
+
 # count how many times we encounter a type of bad posture
 head_drop_count = 0
 too_close_count = 0
@@ -183,11 +187,12 @@ def show_popup(message):
     btn.pack(pady=5)
 
 def process_frame():
-    global initial_head_position, initial_head_shoulder_distance, initial_eye_distance, countdown_start_time, countdown_duration, bad_posture, head_bad, shoulders_bad, face_bad, head_drop, shoulder_hunch, face_closeness, head_drop_count, shrug_count, too_close_count, count, count2, count3, posture_start_time, posture_start_time2, posture_start_time3, isCalibrated, mission_control_response
+    global initial_head_position, initial_head_shoulder_distance, initial_eye_distance, countdown_start_time, countdown_duration, bad_posture, head_bad, shoulders_bad, face_bad, head_drop, shoulder_hunch, face_closeness, head_drop_count, shrug_count, too_close_count, count, count2, count3, posture_start_time, posture_start_time2, posture_start_time3, isCalibrated, mission_control_response, flag, posture_flag
 
-    if mission_control_response:
+    if mission_control_response and not flag:
         show_popup(mission_control_response)
         mission_control_response = ""
+        flag = True
 
     ret, frame = cap.read()
     if not ret:
@@ -238,7 +243,7 @@ def process_frame():
                 posture_label.config(text="Calibration complete.\n Maintain good posture!", fg="green", font=space_font)
                 root.update()
                 animate_logo()
-                time.sleep(1.5)
+                # time.sleep(1.5)
                 isCalibrated += 1
         else:
             if current_head_shoulder_distance < initial_head_shoulder_distance - 30:
@@ -287,7 +292,9 @@ def process_frame():
                 posture_start_time3 = None
 
             if bad_posture:
-                mission_control_response = cerebrasRequest(head_bad, shoulders_bad, face_bad, head_drop, shoulder_hunch, face_closeness)
+                if not posture_flag:
+                    mission_control_response = cerebrasRequest(head_bad, shoulders_bad, face_bad, head_drop, shoulder_hunch, face_closeness)
+                    posture_flag = True
                 # Send the message to the popup window
 
             if posture_warning:
