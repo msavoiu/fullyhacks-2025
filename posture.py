@@ -82,7 +82,7 @@ while cap.isOpened():
                     count += 1
                 else:
                     posture_time_elapsed = time.time() - posture_start_time
-                    if posture_time_elapsed >= 7:
+                    if posture_time_elapsed >= 4:
                         cv2.putText(frame, "Bad Posture: Shoulders too high", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
             else:
                 # Reset if posture improves
@@ -96,7 +96,7 @@ while cap.isOpened():
                     count2 += 1
                 else:
                     posture_time_elapsed2 = time.time() - posture_start_time2
-                    if posture_time_elapsed2 >= 7:
+                    if posture_time_elapsed2 >= 4:
                         cv2.putText(frame, "Bad Posture: Head dropped", (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
             else:
                 # Reset if posture improves
