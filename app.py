@@ -136,7 +136,16 @@ posture_label.grid(column=0, row=1, sticky="NW", pady=(85, 10), padx=(50, 0))
 title_label = Label(mainframe, text="Fully Hacks 2025", font=space_font, bg="white", fg="black")
 title_label.grid(row=1, column=0, columnspan=3, pady=(20, 10), padx=0, sticky="n")
 
+moving_logo = Label(root, image=logo, bg="#0B1B3A")
+moving_logo.image = logo 
+moving_logo.place(x=-100, y=50)  
 
+def animate_logo(x=0):
+    if x <= root.winfo_width():
+        moving_logo.place(x=x, y=50)
+        root.after(10, animate_logo, x+30) 
+    else:
+        moving_logo.place_forget() 
 
 def process_frame():
     global initial_head_position, initial_head_shoulder_distance, initial_eye_distance, countdown_start_time, countdown_duration, head_drop_count, shrug_count, too_close_count, count, count2, count3, posture_start_time, posture_start_time2, posture_start_time3, isCalibrated
@@ -186,6 +195,9 @@ def process_frame():
                 initial_head_position = current_head_position
                 initial_eye_distance = current_eye_distance
                 posture_label.config(text="Calibration complete.\n Maintain good posture!", fg="green", font=space_font)
+                root.update()
+                animate_logo()
+                time.sleep(1.5)
                 isCalibrated += 1
         else:
             if current_head_shoulder_distance < initial_head_shoulder_distance - 30:
