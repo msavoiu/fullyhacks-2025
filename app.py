@@ -165,15 +165,6 @@ def animate_logo(x=0):
     else:
         moving_logo.place_forget()
 
-# def check_for_message():
-#     global mission_control_response
-#     if mission_control_response:
-#         # Show popup window
-#         show_popup(mission_control_response)
-#         mission_control_response = ""  # Reset the variable after showing the popup
-#     # Check again in 1 second
-#     root.after(500, check_for_message)
-
 def show_popup(message):
     popup = tk.Toplevel()
     popup.title("Alert from Mission Control!")
@@ -183,16 +174,15 @@ def show_popup(message):
     label = tk.Label(popup, text=message, fg="white", bg="#1b063d", wraplength=280, font=("Arial", 11))
     label.pack(pady=10, padx=10)
 
-    btn = tk.Button(popup, text="OK", command=popup.destroy)
-    btn.pack(pady=5)
+    def on_close():
+        global flag, posture_flag
+        flag = False  # Reset the flag when the popup is closed
+        popup.destroy()
+
+    popup.protocol("WM_DELETE_WINDOW", on_close)
 
 def process_frame():
     global initial_head_position, initial_head_shoulder_distance, initial_eye_distance, countdown_start_time, countdown_duration, bad_posture, head_bad, shoulders_bad, face_bad, head_drop, shoulder_hunch, face_closeness, head_drop_count, shrug_count, too_close_count, count, count2, count3, posture_start_time, posture_start_time2, posture_start_time3, isCalibrated, mission_control_response, flag, posture_flag
-
-    if mission_control_response and not flag:
-        show_popup(mission_control_response)
-        mission_control_response = ""
-        flag = True
 
     ret, frame = cap.read()
     if not ret:
@@ -295,12 +285,19 @@ def process_frame():
                 if not posture_flag:
                     mission_control_response = cerebrasRequest(head_bad, shoulders_bad, face_bad, head_drop, shoulder_hunch, face_closeness)
                     posture_flag = True
-                # Send the message to the popup window
+            else:
+                posture_flag = False
 
             if posture_warning:
                 posture_label.config(text=posture_warning, fg="red",font=space_font)
             else:
                 posture_label.config(text="Posture looks good!", fg="green",font=space_font)
+
+        print("flag:", flag, "\nposture_flag:", posture_flag)
+        if not flag and mission_control_response:
+            show_popup(mission_control_response)
+            flag = True
+            mission_control_response = ""
 
         # Draw pose landmarks
         mp.solutions.drawing_utils.draw_landmarks(frame, result.pose_landmarks, mp_pose.POSE_CONNECTIONS)
