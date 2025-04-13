@@ -133,7 +133,8 @@ posture_label = Label(mainframe, text="", font=space_font, bg = "white", fg="red
 posture_label.grid(column=0, row=1, sticky="NW", pady=(85, 10), padx=(50, 0))
 
 title_label = Label(mainframe, text="Fully Hacks 2025", font=space_font, bg="white", fg="black")
-title_label.grid(row=0, column=0,columnspan=3, pady=(0, 10), padx=0,sticky="n")
+title_label.grid(row=1, column=0, columnspan=3, pady=(20, 10), padx=0, sticky="n")
+
 
 
 def process_frame():
