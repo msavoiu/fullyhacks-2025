@@ -2,6 +2,7 @@ import cv2
 import mediapipe as mp
 import statistics
 import time
+import os
 from tkinter import *
 from tkinter import ttk, font as tkfont
 from PIL import Image, ImageTk  # For converting OpenCV frame to Tkinter-compatible format
@@ -73,7 +74,13 @@ except Exception as e:
 # Load custom font or fallback
 try:
     font_path = os.path.join(os.path.dirname(__file__), 'assets', 'space_font_serif.ttf')
-    space_font = tkfont.Font(file=font_path, size=24)
+    
+    if os.path.exists(font_path):
+        print("Custom font file found, attempting to use it.")
+        space_font = tkfont.Font(family="Space Grotesk Light", size=24)
+    else:
+        raise FileNotFoundError("Font file not found.")
+
 except Exception as e:
     print("Error: Could not load custom font. Using Arial.", e)
     space_font = tkfont.Font(family="Arial", size=24)
@@ -92,6 +99,7 @@ if background:
     bg_label = Label(mainframe, image=background)
     bg_label.place(x=0, y=0, relwidth=1, relheight=1)
     bg_label.lower()
+    bg_label = Label(mainframe, image=background)
 
 # Video label
 video_label = Label(mainframe, width=desired_width, height=desired_height)
@@ -103,8 +111,8 @@ label.image = logo
 label.grid(column=0, row=1, sticky="N", pady=(100, 20))
 
 # Posture status label (uses space font)
-posture_label = Label(mainframe, text="", font=space_font, fg="red")
-posture_label.grid(column=0, row=2, pady=(100, 20))
+posture_label = Label(mainframe, text="", font=space_font, bg= "#1b063d", fg="red")
+posture_label.grid(column=0, row=1, sticky="NW", pady=(100, 20))
 
 def process_frame():
     global initial_head_position, initial_head_shoulder_distance, countdown_start_time
@@ -216,6 +224,7 @@ def on_closing():
     root.destroy()
 
 root.protocol("WM_DELETE_WINDOW", on_closing)
+root.geometry("1000x700")
 
 # Run the app
 root.mainloop()
