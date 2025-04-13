@@ -1,6 +1,6 @@
 import cv2
 import mediapipe as mp
-import os
+import statistics
 import time
 from tkinter import *
 from tkinter import ttk, font as tkfont
@@ -14,7 +14,7 @@ mp_pose = mp.solutions.pose
 pose = mp_pose.Pose()
 
 # Capture video
-cap = cv2.VideoCapture(1)  # Use 0 for default webcam
+cap = cv2.VideoCapture(0)  # Use 0 for default webcam
 
 # Initial calibration
 initial_shoulder_distance = None
@@ -107,7 +107,7 @@ posture_label = Label(mainframe, text="", font=space_font, fg="red")
 posture_label.grid(column=0, row=2, pady=(100, 20))
 
 def process_frame():
-    global initial_head_position, initial_head_shoulder_distance, countdown_start_time 
+    global initial_head_position, initial_head_shoulder_distance, countdown_start_time
 
     ret, frame = cap.read()
     if not ret:
@@ -123,7 +123,7 @@ def process_frame():
         left_shoulder = result.pose_landmarks.landmark[mp_pose.PoseLandmark.LEFT_SHOULDER]
         right_shoulder = result.pose_landmarks.landmark[mp_pose.PoseLandmark.RIGHT_SHOULDER]
         head = result.pose_landmarks.landmark[mp_pose.PoseLandmark.NOSE]
-        left_eye = result.pose_landmarks.landmark[mp_pose.PoseLandmark.LEFT_EAR] 
+        left_eye = result.pose_landmarks.landmark[mp_pose.PoseLandmark.LEFT_EAR]
         right_eye = result.pose_landmarks.landmark[mp_pose.PoseLandmark.RIGHT_EAR]
 
          # Convert landmark positions to pixel values
