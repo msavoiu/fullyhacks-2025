@@ -1,6 +1,5 @@
 import cv2
 import mediapipe as mp
-import statistics
 import time
 import os
 from tkinter import *
@@ -145,6 +144,7 @@ def process_frame():
         return
 
     frame = cv2.flip(frame, 1)
+
     rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     result = pose.process(rgb)
 
@@ -174,7 +174,8 @@ def process_frame():
                     reset_button.place(relx=1.0, rely=1.0, anchor='se', x=-30, y=-30)
 
         time_elapsed = time.time() - countdown_start_time
-        if current_head_shoulder_distance is None or initial_head_position is None or initial_eye_distance is None:
+        # if current_head_shoulder_distance is None or initial_head_position is None or initial_eye_distance is None:
+        if initial_head_shoulder_distance is None or initial_head_position is None or initial_eye_distance is None:
             if time_elapsed < countdown_duration:
                 posture_label.config(
                     text=f"Calibrating...Sit up straight\n({int(countdown_duration - time_elapsed)}s)", fg="black",font=space_font)
@@ -185,7 +186,7 @@ def process_frame():
                 posture_label.config(text="Calibration complete.\n Maintain good posture!", fg="green", font=space_font)
                 isCalibrated += 1
         else:
-            if current_shoulder_level < initial_head_shoulder_distance - 30:
+            if current_head_shoulder_distance < initial_head_shoulder_distance - 30:
                 if count == 1:
                     posture_start_time = time.time()
                     count += 1
